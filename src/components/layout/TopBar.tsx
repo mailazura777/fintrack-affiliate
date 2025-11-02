@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +22,21 @@ export const TopBar = ({ user }: TopBarProps) => {
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
+  // Fetch user profile to get role
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("full_name, role")
+        .eq("id", user.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -30,6 +46,17 @@ export const TopBar = ({ user }: TopBarProps) => {
       console.error("Logout error:", error);
       toast.error("Gagal logout");
     }
+  };
+
+  const getRoleDisplay = (role: string) => {
+    const roleMap: Record<string, string> = {
+      superadmin: "Superadmin",
+      leader: "Leader",
+      admin: "Admin",
+      staff: "Staff",
+      viewer: "Viewer",
+    };
+    return roleMap[role] || role;
   };
 
   return (
@@ -70,8 +97,10 @@ export const TopBar = ({ user }: TopBarProps) => {
 
         <div className="ml-2 flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent/50 transition-colors">
           <div className="text-right">
-            <p className="text-sm font-medium">{user.email}</p>
-            <p className="text-xs text-muted-foreground">Superadmin</p>
+            <p className="text-sm font-medium">{profile?.full_name || user.email}</p>
+            <p className="text-xs text-muted-foreground">
+              {profile?.role ? getRoleDisplay(profile.role) : "Loading..."}
+            </p>
           </div>
         </div>
 

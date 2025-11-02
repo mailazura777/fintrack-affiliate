@@ -8,6 +8,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Employees from "./pages/Employees";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -112,10 +113,7 @@ const App = () => (
               path="/employees"
               element={
                 <AppLayout>
-                  <div className="p-6">
-                    <h1 className="text-3xl font-bold">Direktori Karyawan</h1>
-                    <p className="text-muted-foreground mt-2">Halaman ini sedang dalam pengembangan</p>
-                  </div>
+                  <Employees />
                 </AppLayout>
               }
             />
